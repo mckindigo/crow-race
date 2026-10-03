@@ -414,7 +414,14 @@ function drawCrow(x, y, s, c, t, o) {
   // body
   if (c.round) ell(0, 6, 46, 40); else ell(0, 6, 50, 34); fs(body, lw);
   ell(6, 18, 30, 16); fs(belly);
-  // scarf in the crow's color (matches its number badge)
+  // Race vest keeps each number attached to its own crow instead of floating above it.
+  // It sits low on the body so scarves, rapper gear, and other head accessories stay visible.
+  if (o.jersey && o.number != null) {
+    ctx.beginPath(); ctx.moveTo(-30, -4); ctx.quadraticCurveTo(0, -12, 29, -2);
+    ctx.lineTo(35, 24); ctx.quadraticCurveTo(8, 39, -25, 32); ctx.closePath(); fs(c.col, 4.5);
+    T(String(o.number), 5, 16, 42, '#fff', 'center', { stroke: OUT, sw: 7, w: 700 });
+  }
+  // scarf in the crow's color (matches its jersey and number)
   ctx.save(); ctx.beginPath(); ctx.moveTo(14, -18); ctx.quadraticCurveTo(30, -4, 48, -14); ctx.lineTo(48, 0); ctx.quadraticCurveTo(28, 10, 12, -4); ctx.closePath(); fs(c.col, 3.5);
   ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(4, 16 + f * 4); ctx.lineTo(14, 18 + f * 4); ctx.lineTo(24, -2); ctx.closePath(); fs(c.col, 3.5); ctx.restore();
   // head
@@ -625,8 +632,7 @@ function drawRace(t) {
     const boosted = c.boost > 0 || (c.wind > 0 && c.windK > 1);
     if (boosted) { ctx.save(); ctx.strokeStyle = c.c.col; ctx.lineWidth = 6; ctx.lineCap = 'round'; for (let q = 0; q < 3; q++) { const yy = y - 18 + q * 18, x0 = x - s * 0.9 - ((t * 600 + q * 40) % 60); ctx.beginPath(); ctx.moveTo(x0, yy); ctx.lineTo(x0 - 70, yy); ctx.stroke(); } ctx.restore(); }
     const back = c.back > 0, stop = !back && c.stop > 0 && !c.place;
-    drawCrow(x, stop ? cy + lh * 0.08 : y, s, c.c, t + c.ph, { stand: stop, tilt: back ? Math.sin(t * 20) * 0.6 - 0.4 : 0, flap: t * (boosted ? 26 : 14) + c.ph });
-    badge(x, y - s * 1.08, Math.max(18, Math.min(24, s * 0.2)), j + 1, c.c.col);
+    drawCrow(x, stop ? cy + lh * 0.08 : y, s, c.c, t + c.ph, { stand: stop, tilt: back ? Math.sin(t * 20) * 0.6 - 0.4 : 0, flap: t * (boosted ? 26 : 14) + c.ph, jersey: true, number: j + 1 });
     if (c.place) { const mc = ['#f4c430', '#c9ccd2', '#cd7f32'][c.place - 1] || P.muted; circ(x - s * 0.95, y - s * 0.35, 26); fs(mc, 4); T(ord(c.place), x - s * 0.95, y - s * 0.34, 22, OUT, 'center'); }
     if (x <= FIELD.x0 + 61 && !c.place) T('\u25C0 ' + Math.round(Math.max(0, (Math.max(...R.crows.map(q => q.d)) - c.d))) + 'm', FIELD.x0 + 4, cy + lh * 0.32, 20, P.bad, 'left');
   });
