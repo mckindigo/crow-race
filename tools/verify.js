@@ -1,9 +1,9 @@
 // Headless verification (puppeteer-core + Chrome, same setup as Chat Clash's tools):
 // full Test-mode loop, stubbed Kick socket counting !crow picks, upset/win distribution over many races,
 // leaderboard updates + reset + persistence, pause, Test mode fully off, both themes (neutral: no "Croww" text but the credit),
-// zero console errors. Screenshots -> shots/.
+// zero console errors. Test screenshots -> shots/test/ (committed reference shots stay in shots/).
 const puppeteer = require('puppeteer-core'), http = require('http'), fs = require('fs'), path = require('path');
-const root = path.join(__dirname, '..'), out = path.join(root, 'shots'); fs.mkdirSync(out, { recursive: true });
+const root = path.join(__dirname, '..'), out = path.join(root, 'shots', 'test'); fs.mkdirSync(out, { recursive: true });
 const srv = http.createServer((q, r) => { const u = decodeURIComponent(q.url.split('?')[0]); fs.readFile(path.join(root, u === '/' ? 'index.html' : u), (e, d) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'content-type': 'text/html' }); r.end(d); } }); }).listen(0);
 let URL0 = '';
 const ok = (c, m) => { console.log((c ? 'ok  ' : 'FAIL') + ' ' + m); if (!c) process.exitCode = 1; };
@@ -83,15 +83,15 @@ const shot = async (page, name) => { const d = await page.evaluate(() => { CR.re
     CR.step(5.1); window.__kickPush('early', '!crow 1'); const early = CR.G.picks.size;   // lineup: betting not open yet
     CR.step(7.1);
     window.__kickPush('alice', '!crow 1'); window.__kickPush('bob', '!crow 2'); window.__kickPush('bob', '!crow 3');   // bob switches: latest counts
-    window.__kickPush('carl', '!crow 99'); window.__kickPush('dana', 'hello chat'); window.__kickPush('eve', '!CROW2');
+    window.__kickPush('carl', '!crow 99'); window.__kickPush('dana', 'hello chat'); window.__kickPush('eve', '!CROW2'); window.__kickPush('decimal', '!crow 2.5'); window.__kickPush('multi', '!crow 1 2');
     window.__kickPush('subfan', '!crow 1', [{ type: 'subscriber', text: 'Subscriber' }]);   // subscriber badge: counted exactly like anyone else
     window.__kickPush('alice', '!crow 1');
     const b = CR.G.lineup.crows.map((c, i) => [...CR.G.picks.values()].filter(p => p.i === i).length);
     return { early, picks: CR.G.picks.size, b, bob: CR.G.picks.get('bob').i, msgs: CR.Kick.msgs, status: CR.Kick.status };
   });
-  ok(s.status === 'live' && s.msgs === 9, 'stub socket delivered ' + s.msgs + ' chat messages through the real Kick reader');
+  ok(s.status === 'live' && s.msgs === 11, 'stub socket delivered ' + s.msgs + ' chat messages through the real Kick reader');
   ok(s.early === 0, 'picks before betting opens are ignored');
-  ok(s.picks === 4 && s.b[0] === 2 && s.b[1] === 1 && s.b[2] === 1 && s.bob === 2, 'backer counts ' + JSON.stringify(s.b) + ' (bob switched to #3, invalid/non-command ignored, one pick per chatter)');
+  ok(s.picks === 4 && s.b[0] === 2 && s.b[1] === 1 && s.b[2] === 1 && s.bob === 2, 'backer counts ' + JSON.stringify(s.b) + ' (bob switched to #3, invalid/non-command/decimal/multi-number ignored, one pick per chatter)');
   await p.close();
 
   // ---------- 3. many simulated races: win distribution + upsets
@@ -100,7 +100,7 @@ const shot = async (page, name) => { const d = await page.evaluate(() => { CR.re
   console.log('  ' + sim.races + ' simulated races, avg winning time ' + sim.avgTime.toFixed(1) + 's');
   const rows = Object.keys(sim.entered).map(k => [k, sim.wins[k] || 0, sim.entered[k]]).sort((a, b) => b[1] / b[2] - a[1] / a[2]);
   for (const [k, w, e] of rows) console.log('    ' + k.padEnd(13) + ' won ' + String(w).padStart(4) + ' / ' + e + ' races entered (' + (100 * w / e).toFixed(1) + '%)');
-  console.log('  favorite won ' + (100 * sim.favWins / sim.races).toFixed(1) + '%, underdog won ' + (100 * sim.dogWins / sim.races).toFixed(1) + '%, 3rd-best-or-worse rated crow won ' + (100 * sim.upsets / sim.races).toFixed(1) + '%');
+  console.log('  favorite won ' + (100 * sim.favWins / sim.races).toFixed(1) + '%, underdog won ' + (100 * sim.dogWins / sim.races).toFixed(1) + '%, bottom-third-or-underdog rated crow won ' + (100 * sim.upsets / sim.races).toFixed(1) + '%');
   console.log('  chaos events: ' + JSON.stringify(sim.events));
   ok(rows.every(r => r[1] > 0), 'every crow wins sometimes');
   ok(sim.dogWins / sim.races > 0.05 && sim.favWins / sim.races < 0.6, 'upsets genuinely happen (underdog wins ' + (100 * sim.dogWins / sim.races).toFixed(1) + '%)');

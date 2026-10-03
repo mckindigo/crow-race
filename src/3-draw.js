@@ -117,12 +117,13 @@ function header(center, sub) {
   chatPill(1890, 52);
 }
 function footer(h) { ctx.fillStyle = P.bar; ctx.fillRect(0, 1080 - (h || 80), 1920, h || 80); }
+const FOOTER_SAFE_RIGHT = 1780;
 function credit(y, col) { T(CREDIT, 960, y, 20, col || P.muted, 'center', { w: 400, raw: true }); }   // shown in EVERY theme, never rewritten
 
 function drawBoard(x, y, w, h, title) {
   rr(x, y, w, h, 22); fs(P.bgB, 4, P.hi);
   T(title || 'TOP PICKERS', x + w / 2, y + 44, 40, P.hi, 'center');
-  T('this stream \u00b7 +1 per correct pick', x + w / 2, y + 82, 19, P.textDim, 'center', { w: 400 });
+  T('this stream \u00b7 +1 per correct pick', x + w / 2, y + 82, 28, P.text, 'center', { w: 700 });
   const rows = topBoard(DATA.boardSize);
   T('PTS', x + w - 120, y + 116, 17, P.textDim, 'right', { w: 500 }); T('STREAK', x + w - 24, y + 116, 17, P.textDim, 'right', { w: 500 });
   if (!rows.length) { T('No points yet.', x + w / 2, y + 190, 30, P.text, 'center'); T('Pick the winner to get on the board!', x + w / 2, y + 230, 22, P.textDim, 'center', { w: 400 }); }
@@ -170,12 +171,12 @@ function drawLineup(t) {
     const stats = [['SPEED', pips(c.spd, 0.96, 1.07)], ['STAMINA', pips(c.sta, 0, 1)], ['LUCK', pips(c.luck, 0, 1)]];
     const sh = Math.min(30, ch / 3.6);
     stats.forEach(([lab, v], j) => {
-      const sy = cy + (j - 1) * sh; T(lab, 860, sy, Math.min(17, sh * 0.62), P.muted, 'right', { w: 500 });
+      const sy = cy + (j - 1) * sh; T(lab, 860, sy, Math.min(26, sh * 0.9), P.cardInk, 'right', { w: 700 });
       for (let q = 0; q < 5; q++) { rr(872 + q * 26, sy - sh * 0.28, 21, sh * 0.56, 4); fs(q < v ? c.col : P.cardLine); }
     });
     const b = backers(i);
-    T(String(b), 1262, cy - ch * 0.12, Math.min(58, ch * 0.42), P.cardInk, 'right');
-    T(b === 1 ? 'BACKER' : 'BACKERS', 1262, cy + ch * 0.2, Math.min(17, ch * 0.13), P.muted, 'right', { w: 500 });
+    T(String(b), 1262, cy - ch * 0.12, Math.min(64, ch * 0.46), P.cardInk, 'right', { w: 700 });
+    T(b === 1 ? 'BACKER' : 'BACKERS', 1262, cy + ch * 0.2, Math.min(24, ch * 0.18), P.cardInk, 'right', { w: 700 });
     rr(1040, cy + ch * 0.33, 222, 10, 5); fs(P.cardLine); if (b) { rr(1040, cy + ch * 0.33, 222 * b / tot, 10, 5); fs(c.col); }
     ctx.restore();
   });
@@ -183,15 +184,15 @@ function drawLineup(t) {
   rr(1320, 786, 560, 202, 22); fs(P.card, 3, P.cardLine);
   T('HOW TO PLAY', 1600, 822, 30, P.gold, 'center');
   T('type  !crow 1-' + n + '  in chat', 1600, 872, 40, P.cardInk, 'center');
-  T('one pick per race \u00b7 the LAST pick counts', 1600, 922, 22, P.muted, 'center', { w: 500 });
-  T('switch any time until betting closes', 1600, 954, 22, P.muted, 'center', { w: 500 });
+  T('one pick per race \u00b7 the LAST pick counts', 1600, 922, 30, P.cardInk, 'center', { w: 700 });
+  T('switch any time until betting closes', 1600, 954, 30, P.cardInk, 'center', { w: 700 });
   footer(80);
   if (G.phase === 'lineup') credit(1040);
   else {
-    T('LATEST PICKS', 40, 1040, 24, P.gold);
-    let x = 220; for (const f of G.feed) { const s = fit(f.u, 24, 220, 600) + ' \u2192 #' + f.n + (f.sw ? ' (switched)' : ''); ctx.font = `600 24px ${F}`; const w = ctx.measureText(sayText(s)).width; if (x + w > 1780) break; T(s, x, 1040, 24, P.ink, 'left', { w: 600 }); x += w + 40; }
-    if (!G.feed.length) T('nobody yet - be first!', x, 1040, 24, P.muted, 'left', { w: 500 });
-    T(G.picks.size + ' picked', 1890, 1040, 24, P.ink, 'right');
+    T('LATEST PICKS', 40, 1040, 32, P.gold, 'left', { w: 700 });
+    let x = 220; for (const f of G.feed) { const s = fit(f.u, 32, 220, 700) + ' \u2192 #' + f.n + (f.sw ? ' (switched)' : ''); ctx.font = `700 32px ${F}`; const w = ctx.measureText(sayText(s)).width; if (x + w > 1660) break; T(s, x, 1040, 32, P.ink, 'left', { w: 700 }); x += w + 40; }
+    if (!G.feed.length) T('nobody yet - be first!', x, 1040, 32, P.ink, 'left', { w: 700 });
+    T(G.picks.size + ' picked', FOOTER_SAFE_RIGHT, 1040, 32, P.ink, 'right', { w: 700 });
   }
 }
 
@@ -246,6 +247,7 @@ function drawRace(t) {
     if (boosted) { ctx.save(); ctx.strokeStyle = c.c.col; ctx.lineWidth = 6; ctx.lineCap = 'round'; for (let q = 0; q < 3; q++) { const yy = y - 18 + q * 18, x0 = x - s * 0.9 - ((t * 600 + q * 40) % 60); ctx.beginPath(); ctx.moveTo(x0, yy); ctx.lineTo(x0 - 70, yy); ctx.stroke(); } ctx.restore(); }
     const back = c.back > 0, stop = !back && c.stop > 0 && !c.place;
     drawCrow(x, stop ? cy + lh * 0.08 : y, s, c.c, t + c.ph, { stand: stop, tilt: back ? Math.sin(t * 20) * 0.6 - 0.4 : 0, flap: t * (boosted ? 26 : 14) + c.ph });
+    badge(x, y - s * 1.08, Math.max(18, Math.min(24, s * 0.2)), j + 1, c.c.col);
     if (c.place) { const mc = ['#f4c430', '#c9ccd2', '#cd7f32'][c.place - 1] || P.muted; circ(x - s * 0.95, y - s * 0.35, 26); fs(mc, 4); T(ord(c.place), x - s * 0.95, y - s * 0.34, 22, OUT, 'center'); }
     if (x <= FIELD.x0 + 61 && !c.place) T('\u25C0 ' + Math.round(Math.max(0, (Math.max(...R.crows.map(q => q.d)) - c.d))) + 'm', FIELD.x0 + 4, cy + lh * 0.32, 20, P.bad, 'left');
   });
@@ -263,7 +265,7 @@ function drawRace(t) {
     ctx.save(); ctx.globalAlpha = 0.94; rr(10, y, FIELD.labelW - 20, h, 14); fs(P.card, 3, c.c.col); ctx.restore();
     const r = Math.min(30, h * 0.3); badge(22 + r, y + h / 2, r, j + 1, c.c.col);
     T(fit(c.c.name.toUpperCase(), Math.min(28, h * 0.27), FIELD.labelW - 2 * r - 50), 2 * r + 36, y + h / 2 - h * 0.15, Math.min(28, h * 0.27), P.cardInk);
-    const b = backers(j); T(b + (b === 1 ? ' backer' : ' backers'), 2 * r + 36, y + h / 2 + h * 0.2, Math.min(20, h * 0.2), P.muted, 'left', { w: 500 });
+    const b = backers(j); T(b + (b === 1 ? ' backer' : ' backers'), 2 * r + 36, y + h / 2 + h * 0.2, Math.min(24, h * 0.24), P.cardInk, 'left', { w: 700 });
   });
   // hawk pass: it lives above the course, with a readable shadow and a clear near-miss/hit beat
   for (const f of R.fx) if (f.type === 'hawk') {
@@ -272,8 +274,8 @@ function drawRace(t) {
       const strike = age < 0.88 ? 0 : age < 1.22 ? (age - 0.88) / 0.34 : 1, leaving = age > 1.22 ? ease((age - 1.22) / 1.25) : 0;
       let hx, hy;
       if (age < 0.88) { const p = ease(age / 0.88); hx = lerp(x - 170, x - 12, p); hy = lerp(-260, cy - hs * 0.52, p); }
-      else if (age < 1.22) { const p = ease((age - 0.88) / 0.34); hx = x + (hit ? lerp(-12, -34, p) : lerp(-12, 88, p)); hy = cy - hs * (hit ? 0.52 : 0.72); }
-      else { hx = lerp(x + (hit ? -34 : 88), x + 360, leaving); hy = lerp(cy - hs * (hit ? 0.52 : 0.72), -300, leaving); }
+      else if (age < 1.22) { const p = ease((age - 0.88) / 0.34); hx = x + (hit ? lerp(-12, -hs * 0.34, p) : lerp(-12, 88, p)); hy = cy - hs * (hit ? 0.76 : 0.72); }
+      else { hx = lerp(x - (hit ? hs * 0.34 : -88), x + 360, leaving); hy = lerp(cy - hs * (hit ? 0.76 : 0.72), -300, leaving); }
       const depth = age < 1.12 ? ease(age / 1.12) : Math.max(0, 1 - (age - 1.12) / 1.35);
       ctx.save(); ctx.globalAlpha = 0.20 + depth * 0.24; ctx.fillStyle = OUT; ell(x + (hit ? -18 : 22), cy + crowS * 0.64, hs * (0.22 + depth * 0.46), 10 + depth * 16, 0.02); ctx.fill(); ctx.restore();
       if (strike > 0 && strike < 1) { ctx.save(); ctx.globalAlpha = 0.72 * Math.sin(strike * Math.PI); ctx.strokeStyle = hit ? P.bad : P.hi; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(x + (hit ? -10 : 40), cy - hs * 0.25, hs * 0.38, -1.1, 1.2); ctx.stroke(); ctx.restore(); }
@@ -300,7 +302,7 @@ function drawRace(t) {
   footer(88); const od = order(R);
   T('POSITIONS', 40, 1036, 24, P.gold);
   let x = 200; od.forEach((c, q) => { badge(x + 20, 1036, 20, c.i + 1, c.c.col); const s = ord(q + 1) + ' ' + c.c.name; T(s, x + 50, 1037, 26, P.ink); ctx.font = `700 26px ${F}`; x += 80 + ctx.measureText(s).width; });
-  T('betting closed', 1890, 1037, 22, P.muted, 'right', { w: 500 });
+  T('betting closed', FOOTER_SAFE_RIGHT, 1037, 26, P.muted, 'right', { w: 600 });
 }
 
 /* ===================================================================== results */
@@ -315,7 +317,7 @@ function drawResults(t) {
   drawCrow(390, 420 + Math.sin(t * 3) * 8, 220, w, t, { crown: true, flap: Math.sin(t * 7) * 0.7 });
   badge(130, 590, 44, res.w + 1, w.col); T(w.name.toUpperCase(), 190, 592, 64, P.cardInk);
   T(G.R.crows[res.w].time ? 'finished in ' + G.R.crows[res.w].time.toFixed(1) + 's' : '', 190, 642, 24, P.muted, 'left', { w: 500 });
-  if (res.upset) { ctx.save(); ctx.translate(620, 250); ctx.rotate(0.18 + Math.sin(t * 4) * 0.03); rr(-120, -42, 240, 84, 14); fs(P.bad, 5, OUT); T(res.dog ? 'UNDERDOG!' : 'UPSET!', 0, 2, res.dog ? 44 : 54, '#fff', 'center'); ctx.restore(); }
+  if (res.upset) { ctx.save(); ctx.translate(620, 340); ctx.rotate(0.18 + Math.sin(t * 4) * 0.03); rr(-120, -42, 240, 84, 14); fs(P.bad, 5, OUT); T(res.dog ? 'UNDERDOG!' : 'UPSET!', 0, 2, res.dog ? 44 : 54, '#fff', 'center'); ctx.restore(); }
   const od = R.finish; od.forEach((ci, q) => {
     const c = lu.crows[ci], y = 712 + q * 44, k = R.crows[ci];
     T(ord(q + 1), 100, y, 28, q === 0 ? P.gold : P.muted, 'right'); badge(136, y, 17, ci + 1, c.col);

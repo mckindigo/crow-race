@@ -84,7 +84,7 @@ function simulate(n) {
     while (!R.done && R.t < 80) stepRace(R, 1 / 30);
     const w = R.finish[0]; lu.crows.forEach(c => out.entered[c.name] = (out.entered[c.name] || 0) + 1);
     out.wins[lu.crows[w].name] = (out.wins[lu.crows[w].name] || 0) + 1;
-    if (w === lu.fav) out.favWins++; if (w === lu.dog) out.dogWins++; if (lu.rank[w] >= 2) out.upsets++;
+    if (w === lu.fav) out.favWins++; if (w === lu.dog) out.dogWins++; if (w === lu.dog || lu.rank[w] >= Math.ceil(lu.crows.length * 2 / 3)) out.upsets++;
     out.avgTime += R.crows[w].time / n; for (const e of R.events) out.events[e.type] = (out.events[e.type] || 0) + 1;
   }
   return out;
@@ -119,7 +119,8 @@ function finishRace() {
   }
   saveBoard();
   winners.sort((a, b) => b.streak - a.streak);
-  G.result = { w, winners, picked: G.picks.size, upset: lu.rank[w] >= 2, dog: w === lu.dog, fav: w === lu.fav };
+  const dog = w === lu.dog;
+  G.result = { w, winners, picked: G.picks.size, upset: dog || lu.rank[w] >= Math.ceil(lu.crows.length * 2 / 3), dog, fav: w === lu.fav };
 }
 function update(dt) {
   if (G.paused) return;
@@ -139,8 +140,8 @@ function skipPhase() { if (G.phase === 'race') { while (!G.R.done && G.R.t < 80)
 function onChat(user, text, src) {
   if (!user || text == null) return false;
   if (src === 'bot' && settings.testMode !== 'on') return false;
-  const m = /^\s*!crow\s*#?(\d+)\b/i.exec(String(text));
-  if (!m || G.phase !== 'betting' || !G.lineup) return false;
+  const raw = String(text), m = /^\s*!crow\s*#?(\d+)(?=\s|$)/i.exec(raw);
+  if (!m || raw.trim() !== m[0].trim() || G.phase !== 'betting' || !G.lineup) return false;
   const n = +m[1]; if (n < 1 || n > G.lineup.crows.length) return false;
   const key = String(user), prev = G.picks.get(key);
   if (prev && prev.i === n - 1) return true;
