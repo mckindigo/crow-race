@@ -49,6 +49,13 @@ function drawCrow(x, y, s, c, t, o) {
   switch (c.acc) {
     case 'mask': ctx.save(); rr(18, -42, 46, 16, 7); ctx.fillStyle = '#0b0a10'; ctx.fill(); circ(46, -33, 8); fs('#fff'); circ(49, -32, 5); fs(OUT); ctx.restore(); break;
     case 'bow': ctx.beginPath(); ctx.moveTo(30, -52); ctx.lineTo(14, -66); ctx.lineTo(14, -44); ctx.closePath(); fs(c.col, 3.5); ctx.beginPath(); ctx.moveTo(30, -52); ctx.lineTo(46, -68); ctx.lineTo(48, -46); ctx.closePath(); fs(c.col, 3.5); circ(30, -52, 6); fs('#fff', 3); break;
+    case 'rapper':
+      // backwards cap + compact shades keep Lil Caw recognizable even at race scale
+      ctx.beginPath(); ctx.arc(34, -34, 31, Math.PI * 1.08, Math.PI * 2.02); ctx.lineTo(7, -48); ctx.lineTo(0, -38); ctx.lineTo(24, -39); ctx.closePath(); fs('#263b72', 4);
+      ctx.beginPath(); ctx.moveTo(8, -43); ctx.lineTo(-18, -37); ctx.lineTo(8, -32); ctx.closePath(); fs('#263b72', 3);
+      rr(26, -39, 37, 12, 5); fs('#101522', 3); ctx.strokeStyle = '#9bd4e8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(47, -38); ctx.lineTo(53, -29); ctx.stroke();
+      ctx.save(); ctx.strokeStyle = '#f4c430'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(8, 16, 22, 0.16, 2.95); ctx.stroke(); circ(24, 31, 5); fs('#f4c430', 2, OUT); ctx.restore();
+      break;
     case 'glasses': circ(47, -32, 14); ctx.lineWidth = 3.5; ctx.strokeStyle = '#e8e8e8'; ctx.stroke(); ctx.beginPath(); ctx.moveTo(33, -34); ctx.lineTo(22, -36); ctx.stroke(); break;
     case 'tophat': rr(10, -58, 54, 8, 3); fs('#15141c', 3.5); rr(18, -94, 38, 38, 4); fs('#15141c', 3.5); rr(18, -66, 38, 8, 0); fs(c.col); break;
     case 'goggles': ctx.strokeStyle = c.col; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(36, -26, 28, Math.PI * 1.05, Math.PI * 1.75); ctx.stroke(); circ(46, -36, 11); fs('rgba(190,230,255,0.8)', 4, c.col); break;
@@ -61,16 +68,32 @@ function drawCrow(x, y, s, c, t, o) {
   ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-40, 2); ctx.lineTo(-4, 2); ctx.stroke(); ctx.restore();
   ctx.restore();
 }
-function drawHawk(x, y, s, t) {
-  ctx.save(); ctx.translate(x, y); ctx.scale(s / 100, s / 100); ctx.lineJoin = 'round';
-  const f = Math.sin(t * 18) * 0.4;
-  ctx.save(); ctx.rotate(-f); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-70, -60); ctx.lineTo(-40, -10); ctx.closePath(); fs('#7a4a24', 4); ctx.restore();
-  ell(0, 0, 52, 22); fs('#9a5f2e', 4); circ(40, -10, 18); fs('#e8e0d0', 4);
-  ctx.beginPath(); ctx.moveTo(54, -14); ctx.lineTo(72, -4); ctx.lineTo(54, -2); ctx.closePath(); fs('#f2c230', 3);
-  circ(46, -14, 4); fs(OUT); ctx.strokeStyle = OUT; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(36, -22); ctx.lineTo(54, -16); ctx.stroke();
-  ctx.save(); ctx.rotate(f); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-60, 60); ctx.lineTo(-30, 8); ctx.closePath(); fs('#6a3f1e', 4); ctx.restore();
+function drawHawk(x, y, s, t, dive) {
+  // A broad, unmistakable raptor silhouette. Coordinates face down/right in a steep dive.
+  dive = dive || 0; const k = s / 100, flap = Math.sin(t * 11) * 0.08;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.rotate(0.32 + dive * 0.14); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const feather = '#4b3429', feather2 = '#76533a', pale = '#eadfc4', beak = '#e0ad2d';
+  // broad spread wings with separated flight feathers
+  ctx.save(); ctx.rotate(-0.10 + flap); ctx.beginPath(); ctx.moveTo(-6, -8); ctx.lineTo(-126, -62); ctx.lineTo(-94, -28); ctx.lineTo(-164, -22); ctx.lineTo(-106, -4); ctx.lineTo(-150, 20); ctx.lineTo(-56, 18); ctx.lineTo(-14, 10); ctx.closePath(); fs(feather, 5); ctx.restore();
+  ctx.save(); ctx.rotate(0.12 - flap); ctx.beginPath(); ctx.moveTo(2, -5); ctx.lineTo(112, -72); ctx.lineTo(92, -32); ctx.lineTo(160, -44); ctx.lineTo(104, -8); ctx.lineTo(145, 10); ctx.lineTo(54, 17); ctx.lineTo(10, 12); ctx.closePath(); fs(feather2, 5); ctx.restore();
+  // wing bar highlights make the spread read at a glance
+  ctx.strokeStyle = 'rgba(235,225,200,0.48)'; ctx.lineWidth = 4;
+  for (const [x1, y1, x2, y2] of [[-116,-45,-62,2],[-133,-15,-66,7],[106,-49,54,4],[130,-25,60,8]]) { ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+  // tapered banded tail
+  ctx.beginPath(); ctx.moveTo(-30, 34); ctx.lineTo(-88, 82); ctx.lineTo(-48, 76); ctx.lineTo(-98, 108); ctx.lineTo(-20, 66); ctx.closePath(); fs(feather, 5);
+  ctx.strokeStyle = '#c58e3e'; ctx.lineWidth = 9; for (const q of [0.3, 0.58, 0.82]) { ctx.beginPath(); ctx.moveTo(-51 - q * 27, 63 + q * 35); ctx.lineTo(-34 - q * 31, 74 + q * 28); ctx.stroke(); }
+  // chest and body
+  ell(0, 18, 40, 52, -0.08); fs(feather2, 5); ell(9, 28, 25, 36, -0.08); fs(pale, 3, '#9e8b70');
+  ctx.strokeStyle = '#b6a281'; ctx.lineWidth = 4; for (let q = -1; q <= 2; q++) { ctx.beginPath(); ctx.moveTo(-4 + q * 8, 2); ctx.lineTo(3 + q * 8, 50); ctx.stroke(); }
+  // head, fierce brow, hooked yellow beak
+  circ(30, -23, 31); fs(feather, 5); circ(40, -28, 10); fs('#fff', 3); circ(43, -27, 5); fs(OUT); ctx.strokeStyle = OUT; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(26, -48); ctx.lineTo(48, -40); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(57, -31); ctx.lineTo(93, -21); ctx.quadraticCurveTo(80, -3, 59, -12); ctx.closePath(); fs(beak, 4, '#9e741b'); ctx.strokeStyle = '#8d6315'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(62, -19); ctx.quadraticCurveTo(77, -17, 85, -12); ctx.stroke();
+  // visible talons reaching toward the crow
+  ctx.strokeStyle = beak; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(-1, 54); ctx.lineTo(-8, 78); ctx.lineTo(-22, 86); ctx.moveTo(18, 55); ctx.lineTo(14, 78); ctx.lineTo(1, 87); ctx.stroke();
+  ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-22, 86); ctx.lineTo(-29, 82); ctx.moveTo(-22, 86); ctx.lineTo(-23, 77); ctx.moveTo(1, 87); ctx.lineTo(-6, 83); ctx.moveTo(1, 87); ctx.lineTo(2, 78); ctx.stroke();
   ctx.restore();
 }
+
 function star(x, y, r, rot, col) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, q = i % 2 ? r * 0.35 : r; ctx.lineTo(Math.cos(a) * q, Math.sin(a) * q); } ctx.closePath(); fs(col, 3); ctx.restore(); }
 
 /* ===================================================================== shared chrome */
@@ -181,19 +204,38 @@ function raceView() {
 }
 function drawRace(t) {
   const R = G.R, lu = G.lineup, n = R.crows.length, { k, cam } = raceView(), D = DATA.race;
-  // sky + parallax hills + clouds
+  // sky + layered parallax course: sun, moving clouds, hills, rooftops and wires
   const g = ctx.createLinearGradient(0, 100, 0, FIELD.top); g.addColorStop(0, P.sky2); g.addColorStop(1, P.sky1); ctx.fillStyle = g; ctx.fillRect(0, 100, 1920, FIELD.top - 100 + 2);
+  ctx.save(); ctx.globalAlpha = 0.72; circ(1560 - (cam * 0.04 % 260), 170, 48); fs(P.hi); circ(1560 - (cam * 0.04 % 260), 170, 72); ctx.globalAlpha = 0.09; fs(P.hi); ctx.restore();
   ctx.fillStyle = P.cloud; for (let i = 0; i < 7; i++) { const x = ((i * 380 - cam * 0.08 - t * 12) % 2400 + 2400) % 2400 - 240, y = 150 + (i * 53) % 90; ell(x, y, 80, 22); ctx.fill(); ell(x + 40, y - 14, 50, 22); ctx.fill(); }
   for (const [col, par, amp, base, fr] of [[P.hill1, 0.15, 40, FIELD.top - 50, 0.004], [P.hill2, 0.35, 28, FIELD.top - 14, 0.007]]) {
     ctx.beginPath(); ctx.moveTo(0, FIELD.top + 2); for (let x = 0; x <= 1920; x += 20) ctx.lineTo(x, base - amp * (0.6 + 0.4 * Math.sin((x + cam * par) * fr) * Math.cos((x + cam * par) * fr * 0.37))); ctx.lineTo(1920, FIELD.top + 2); ctx.closePath(); ctx.fillStyle = col; ctx.fill();
   }
-  // lanes
+  // A distant, slow-moving skyline gives the open-air race a sense of place.
+  ctx.save(); ctx.globalAlpha = 0.34; const cityShift = (cam * 0.12) % 420;
+  for (let bx = -80 - cityShift, i = 0; bx < 2050; bx += 86, i++) { const bw = 48 + (i * 17) % 34, bh = 28 + (i * 31) % 64, by = FIELD.top - 8 - bh; ctx.fillStyle = i % 3 ? P.hill2 : P.post; ctx.fillRect(bx, by, bw, bh); ctx.beginPath(); ctx.moveTo(bx - 5, by); ctx.lineTo(bx + bw * 0.5, by - 15 - (i % 2) * 8); ctx.lineTo(bx + bw + 5, by); ctx.closePath(); ctx.fill(); if (i % 2) { ctx.fillStyle = P.sky2; for (let wy = by + 12; wy < by + bh - 4; wy += 15) ctx.fillRect(bx + 10, wy, 7, 6); } }
+  ctx.restore();
+  // distant birds and telephone lines, deliberately faint so racers remain the focus
+  ctx.save(); ctx.globalAlpha = 0.42; ctx.strokeStyle = P.post; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  const wireShift = (cam * 0.18) % 360; for (let wx = -120 - wireShift; wx < 2100; wx += 360) { ctx.fillStyle = P.post; ctx.fillRect(wx - 4, 205, 8, 82); ctx.beginPath(); ctx.moveTo(wx - 4, 205); ctx.lineTo(wx + 4, 205); ctx.stroke(); }
+  for (const wy of [220, 238]) { ctx.beginPath(); for (let wx = -150; wx <= 2050; wx += 24) ctx.lineTo(wx, wy + Math.sin(wx * 0.018 + cam * 0.01) * 3); ctx.stroke(); }
+  for (let i = 0; i < 8; i++) { const bx = ((i * 291 - cam * 0.18 + t * 18) % 2300 + 2300) % 2300 - 160, by = 178 + (i * 37) % 66; ctx.beginPath(); ctx.moveTo(bx - 10, by); ctx.quadraticCurveTo(bx, by + 7, bx + 10, by); ctx.stroke(); }
+  ctx.restore();
+  // lanes: alternating tints, rope-like dividers and regularly spaced posts
   const lh = (FIELD.bot - FIELD.top) / n;
-  for (let j = 0; j < n; j++) { ctx.fillStyle = j % 2 ? P.laneB : P.laneA; ctx.fillRect(0, FIELD.top + j * lh, 1920, lh); ctx.fillStyle = P.laneLine; ctx.fillRect(0, FIELD.top + j * lh, 1920, 3); }
+  for (let j = 0; j < n; j++) { const y = FIELD.top + j * lh; const lg = ctx.createLinearGradient(0, y, 1920, y + lh); lg.addColorStop(0, j % 2 ? P.laneB : P.laneA); lg.addColorStop(1, j % 2 ? P.laneA : P.laneB); ctx.fillStyle = lg; ctx.fillRect(0, y, 1920, lh); }
+  ctx.save(); ctx.globalAlpha = 0.85; ctx.lineCap = 'round';
+  for (let j = 1; j < n; j++) { const y = FIELD.top + j * lh; ctx.strokeStyle = P.post; ctx.lineWidth = 4; ctx.beginPath(); for (let xx = 0; xx <= 1920; xx += 24) ctx.lineTo(xx, y + Math.sin(xx * 0.022 + cam * 0.012) * 3); ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 2; ctx.beginPath(); for (let xx = 0; xx <= 1920; xx += 24) ctx.lineTo(xx, y - 3 + Math.sin(xx * 0.022 + cam * 0.012) * 3); ctx.stroke(); }
+  const postShift = (cam * 0.35) % 260; ctx.fillStyle = P.post; for (let xx = -postShift; xx < 2050; xx += 260) for (let j = 1; j < n; j++) { const y = FIELD.top + j * lh; ctx.fillRect(xx - 4, y - 12, 8, 24); circ(xx, y - 13, 6); ctx.fill(); }
+  ctx.restore();
+  // tiny leaves and feathers scroll through the open course
+  ctx.save(); ctx.globalAlpha = 0.34; ctx.lineWidth = 3; for (let i = 0; i < 15; i++) { const fx = ((i * 257 + t * (55 + i * 3) - cam * 0.7) % 2200 + 2200) % 2200 - 140, fy = FIELD.top + 35 + ((i * 83) % Math.max(80, FIELD.bot - FIELD.top - 70)); ctx.strokeStyle = i % 2 ? P.gold : P.hi; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.quadraticCurveTo(fx + 14, fy - 9, fx + 25, fy + 2); ctx.stroke(); ctx.beginPath(); ctx.moveTo(fx + 10, fy - 4); ctx.lineTo(fx + 18, fy + 5); ctx.stroke(); }
+  ctx.restore();
   const sx = px => FIELD.x0 + px - cam;
   ctx.fillStyle = 'rgba(0,0,0,0.07)'; for (let px = Math.floor(cam / 175) * 175; px < cam + 1800; px += 175) ctx.fillRect(sx(px), FIELD.top, 6, FIELD.bot - FIELD.top);
   for (let m = 0; m <= 1000; m += 100) { const x = sx(m * k); if (x < FIELD.x0 - 40 || x > 1960) continue; ctx.fillStyle = P.post; ctx.fillRect(x - 4, FIELD.top - 46, 8, 46); rr(x - 40, FIELD.top - 78, 80, 34, 8); fs(P.bar, 3, P.post); T(m === 0 ? 'START' : m === 1000 ? 'FINISH' : m + 'm', x, FIELD.top - 60, 20, P.ink, 'center'); }
-  const fx = sx(D.trackPx); if (fx < 1960) for (let y = FIELD.top, r = 0; y < FIELD.bot; y += 24, r++) for (let c = 0; c < 2; c++) { ctx.fillStyle = (r + c) % 2 ? '#111' : '#fff'; ctx.fillRect(fx + c * 24, y, 24, 24); }
+  const startX = sx(0); if (startX > -80 && startX < 1940) { ctx.fillStyle = P.post; ctx.fillRect(startX - 10, FIELD.top - 18, 12, FIELD.bot - FIELD.top + 18); ctx.fillRect(startX + 72, FIELD.top - 18, 12, FIELD.bot - FIELD.top + 18); ctx.fillRect(startX - 10, FIELD.top - 30, 96, 12); for (let q = 0; q < 6; q++) { ctx.fillStyle = q % 2 ? P.ink : P.bar; ctx.fillRect(startX + q * 16 - 6, FIELD.top - 30, 16, 12); } }
+  const fx = sx(D.trackPx); if (fx > -120 && fx < 2040) { for (let y = FIELD.top, r = 0; y < FIELD.bot; y += 24, r++) for (let c = 0; c < 2; c++) { ctx.fillStyle = (r + c) % 2 ? P.ink : P.bar; ctx.fillRect(fx + c * 24, y, 24, 24); } ctx.fillStyle = P.post; ctx.fillRect(fx - 64, FIELD.top - 22, 8, 70); ctx.fillRect(fx + 42, FIELD.top - 22, 8, 70); for (let r = 0; r < 2; r++) for (let c = 0; c < 8; c++) { ctx.fillStyle = (r + c) % 2 ? P.ink : P.bar; ctx.fillRect(fx - 60 + c * 14, FIELD.top - 70 + r * 14, 14, 14); } }
   // wind streaks
   if (R.crows.some(c => c.wind > 0)) { ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; for (let i = 0; i < 26; i++) { const x = ((i * 157 + t * 1500) % 2200) - 140, y = 130 + (i * 97) % 850; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 110, y); ctx.stroke(); } ctx.restore(); }
   // crows
@@ -210,7 +252,7 @@ function drawRace(t) {
   // event effects
   for (const f of R.fx) {
     const c = R.crows[f.i], j = f.i, cy = FIELD.top + j * lh + lh / 2, x = Math.max(FIELD.x0 + 60, sx(c.d * k)), age = R.t - f.t0, s = Math.min(120, lh * 0.85);
-    if (f.type === 'hawk') { const a = clamp(age / 0.7, 0, 1), b = clamp((age - 0.7) / 1, 0, 1); const hx = age < 0.7 ? lerp(x - 380, x, ease(a)) : lerp(x, x + 700, b), hy = age < 0.7 ? lerp(120, cy - s * 0.5, ease(a)) : lerp(cy - s * 0.5, 60, b); if (age < 1.7) drawHawk(hx, hy, 130, t); }
+    if (f.type === 'hawk') { /* drawn in a final pass above the lane labels and racers */ }
     else if (f.type === 'shiny' && age < f.dur) { star(x + s * 0.95, cy + s * 0.32, 22 + Math.sin(t * 10) * 5, t * 3, '#ffe066'); star(x + s * 1.25, cy - s * 0.1, 10, -t * 4, '#fff6b0'); }
     else if (f.type === 'worm' && age < 1.4) { ctx.save(); ctx.strokeStyle = '#e8829a'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.beginPath(); for (let q = 0; q <= 6; q++) ctx.lineTo(x + s * 0.8 + q * 7, cy - s * 0.75 - age * 30 + Math.sin(q + t * 10) * 6); ctx.stroke(); ctx.restore(); }
     else if (f.type === 'updraft' && age < 2.5) { ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 5; for (let q = 0; q < 3; q++) { ctx.beginPath(); ctx.arc(x - 20 + q * 30, cy + s * 0.45 - ((age * 120 + q * 25) % 70), 16, Math.PI * 0.2, Math.PI * 1.6); ctx.stroke(); } ctx.restore(); }
@@ -223,6 +265,21 @@ function drawRace(t) {
     T(fit(c.c.name.toUpperCase(), Math.min(28, h * 0.27), FIELD.labelW - 2 * r - 50), 2 * r + 36, y + h / 2 - h * 0.15, Math.min(28, h * 0.27), P.cardInk);
     const b = backers(j); T(b + (b === 1 ? ' backer' : ' backers'), 2 * r + 36, y + h / 2 + h * 0.2, Math.min(20, h * 0.2), P.muted, 'left', { w: 500 });
   });
+  // hawk pass: it lives above the course, with a readable shadow and a clear near-miss/hit beat
+  for (const f of R.fx) if (f.type === 'hawk') {
+    const c = R.crows[f.i], j = f.i, cy = FIELD.top + j * lh + lh / 2, x = Math.max(FIELD.x0 + 60, sx(c.d * k)), age = R.t - f.t0, crowS = Math.min(120, lh * 0.85), hs = Math.max(190, crowS * 1.75), hit = c.back > 0;
+    if (age >= 0 && age < 2.55) {
+      const strike = age < 0.88 ? 0 : age < 1.22 ? (age - 0.88) / 0.34 : 1, leaving = age > 1.22 ? ease((age - 1.22) / 1.25) : 0;
+      let hx, hy;
+      if (age < 0.88) { const p = ease(age / 0.88); hx = lerp(x - 170, x - 12, p); hy = lerp(-260, cy - hs * 0.52, p); }
+      else if (age < 1.22) { const p = ease((age - 0.88) / 0.34); hx = x + (hit ? lerp(-12, -34, p) : lerp(-12, 88, p)); hy = cy - hs * (hit ? 0.52 : 0.72); }
+      else { hx = lerp(x + (hit ? -34 : 88), x + 360, leaving); hy = lerp(cy - hs * (hit ? 0.52 : 0.72), -300, leaving); }
+      const depth = age < 1.12 ? ease(age / 1.12) : Math.max(0, 1 - (age - 1.12) / 1.35);
+      ctx.save(); ctx.globalAlpha = 0.20 + depth * 0.24; ctx.fillStyle = OUT; ell(x + (hit ? -18 : 22), cy + crowS * 0.64, hs * (0.22 + depth * 0.46), 10 + depth * 16, 0.02); ctx.fill(); ctx.restore();
+      if (strike > 0 && strike < 1) { ctx.save(); ctx.globalAlpha = 0.72 * Math.sin(strike * Math.PI); ctx.strokeStyle = hit ? P.bad : P.hi; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(x + (hit ? -10 : 40), cy - hs * 0.25, hs * 0.38, -1.1, 1.2); ctx.stroke(); ctx.restore(); }
+      if (age < 2.35) drawHawk(hx, hy, hs, t, 1 - leaving);
+    }
+  }
   // header + minimap
   ctx.fillStyle = P.bar; ctx.fillRect(0, 0, 1920, 100); ctx.fillStyle = P.hi; ctx.fillRect(0, 100, 1920, 6);
   T('CROW RACE', 40, 52, 62, P.ink); ctx.font = `700 62px ${F}`; T('RACE #' + G.raceNo, 62 + ctx.measureText('CROW RACE').width, 54, 30, P.muted);

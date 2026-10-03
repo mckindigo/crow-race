@@ -17,7 +17,7 @@ const DATA = {
   roster: [
     { id: 'bigbeak',     name: 'Big Beak',     line: 'All beak, no brakes.',              spd: 1.035, sta: 0.45, luck: 0.30, greed: 0.30, acc: 'beak',    col: '#d9583b' },
     { id: 'shinythief',  name: 'Shiny Thief',  line: 'Stops for anything that glitters.', spd: 1.045, sta: 0.60, luck: 0.50, greed: 1.00, acc: 'mask',    col: '#e0b030' },
-    { id: 'lilcaw',      name: 'Lil Caw',      line: 'Tiny, fearless, weirdly lucky.',    spd: 0.970, sta: 0.70, luck: 0.95, greed: 0.30, acc: 'bow',     col: '#e86fa0', small: true },
+    { id: 'lilcaw',      name: 'Lil Caw',      line: 'Spits bars mid-flight. Small bird, big flow.', spd: 0.970, sta: 0.70, luck: 0.95, greed: 0.30, acc: 'rapper',  col: '#e86fa0', small: true },
     { id: 'oldfeathers', name: 'Old Feathers', line: 'Slow start. Never gets tired.',     spd: 0.970, sta: 1.00, luck: 0.60, greed: 0.10, acc: 'glasses', col: '#9aa0a6', grey: true },
     { id: 'sirsquawks',  name: 'Sir Squawks',  line: 'Top hat. Bigger ego.',              spd: 1.020, sta: 0.60, luck: 0.40, greed: 0.45, acc: 'tophat',  col: '#7b5cd6' },
     { id: 'midnight',    name: 'Midnight',     line: 'Silent, fast, a little spooky.',    spd: 1.030, sta: 0.40, luck: 0.40, greed: 0.20, acc: 'none',    col: '#4f7dd9' },
